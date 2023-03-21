@@ -6,7 +6,7 @@
 #    By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/09 14:58:51 by abiru             #+#    #+#              #
-#    Updated: 2023/03/13 21:59:47 by abiru            ###   ########.fr        #
+#    Updated: 2023/03/21 12:25:43 by abiru            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@ NAME = philo
 
 SRCS = philo.c ft_atoi.c get_time.c
 
-CC = gcc -g -O0
+CC = gcc -g -O0 -fsanitize=address
 
 CFLAGS = -Wextra -Werror -Wall
 

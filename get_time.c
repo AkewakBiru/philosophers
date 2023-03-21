@@ -2,29 +2,13 @@
 #include <sys/time.h>
 #include <stdio.h>
 
-long long int	get_time()
+unsigned long	get_time()
 {
-	long long int tm;
+	unsigned long tm;
 	struct timeval	time;
 
 	gettimeofday(&time, 0);
-	// changes time to milliseconds (doesn't change anything, but i can use whatever start time i want)
-	tm = time.tv_sec;
+	// time in sec and microsecond converted to millisec
+	tm = time.tv_sec * 1000 + time.tv_usec / 1000;
 	return (tm);
 }
-
-// void get_time_diff(long long t1, long long t2)
-// {
-	
-// }
-
-// int main()
-// {
-// 	long long time;
-
-// 	time = get_time();
-// 	// time = time * 1000;
-// 	printf("%lld\n", time);
-// 	// get_time_diff();
-// 	// get_time_diff();
-// }

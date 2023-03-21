@@ -6,6 +6,7 @@ pthread_mutex_t lock;
 
 void *routine()
 {
+	printf("here\n");
 	pthread_mutex_lock(&lock);
 	for (int i = 0; i< 20000; i++)
 		j++;
@@ -22,6 +23,7 @@ int main()
 	pthread_create(&t_id1, 0, routine, 0);
 	pthread_create(&t_id2, 0, routine, 0);
 
+	printf("in parent scope\n");
 	pthread_join(t_id1, 0);
 	pthread_join(t_id2, 0);
 
