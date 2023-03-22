@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/28 07:54:49 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/21 22:00:19 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/22 14:54:51 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@ void	validate_input(t_info *global, int ac, char **av)
 	if (ft_atoi(av[1]) > 200 || ft_atoi(av[1]) < 1)
 		exit(1);
 	global->num_philo = ft_atoi(av[1]);
-	global->time_to_eat = ft_atoi(av[2]);
-	global->time_to_die = ft_atoi(av[3]);
+	global->time_to_die = ft_atoi(av[2]);
+	global->time_to_eat = ft_atoi(av[3]);
 	global->time_to_sleep = ft_atoi(av[4]);
 	if (av[5] && ft_atoi(av[5]) > 0)
 		*global->num_eat = ft_atoi(av[5]);
@@ -33,15 +33,16 @@ void	finish_exec(t_info *philos)
 	int	i;
 
 	i = -1;
+	// pthread_mutex_unlock(&philos->print_mutex);
+	// while (++i < philos->num_philo)
+	// 	pthread_mutex_unlock(philos->forks + (sizeof(pthread_mutex_t) * i));
+	i = -1;
 	while (++i < philos->num_philo)
 		pthread_mutex_destroy(philos->forks + (sizeof(pthread_mutex_t) * i));
 	pthread_mutex_destroy(&philos->print_mutex);
 	i = -1;
 	while (++i < philos->num_philo)
-	{
 		pthread_detach(philos->philo[i].id);
-		philos->philo[i].num = i;
-	}
 	free(philos->forks);
 	free(philos->philo);
 	exit(1);
@@ -79,10 +80,24 @@ void	ft_sleep(int id, t_info *global)
 	usleep(global->time_to_sleep * 1000);
 }
 
+void	handle_one_philo(t_philo *philo, t_info *global)
+{
+	pthread_mutex_lock(philo->left_fork);
+	pthread_mutex_lock(&global->print_mutex);
+	printf("[%lu] %d has taken a fork\n", get_time() - global->start_time, philo->num);
+	pthread_mutex_unlock(&global->print_mutex);
+	pthread_mutex_lock(&global->print_mutex);
+	printf("[%lu] %d died\n", get_time() - global->start_time, philo->num);
+	pthread_mutex_unlock(&global->print_mutex);
+	finish_exec(global);
+}
+
 void *routine(void *d)
 {
 	t_philo *philo = (t_philo *)d;
 	t_info *global = philo->p_info;
+	if (global->num_philo == 1)
+		handle_one_philo(philo, global);
 	if (philo->num % 2 == 0)
 	{
 		pthread_mutex_lock(&global->print_mutex);
@@ -102,10 +117,13 @@ void *routine(void *d)
 		pthread_mutex_lock(&global->print_mutex);
 		printf("[%lu] %d has taken right fork\n", get_time() - global->start_time, philo->num);
 		pthread_mutex_unlock(&global->print_mutex);
-		philo->last_ate = get_time();
+		// pthread_mutex_lock(&global->r_mutex);
+		// pthread_mutex_unlock(&global->r_mutex);
 		philo->num_eat++;
 		// start eating
 		eat(philo->num, global);
+		// last ate should be the time they are done eating
+		philo->last_ate = get_time();
 		// release forks
 		pthread_mutex_unlock(philo->left_fork);
 		pthread_mutex_unlock(philo->right_fork);
@@ -121,11 +139,31 @@ void *routine(void *d)
 
 void	check_philos(t_info	*philos)
 {
-	(void)philos;
+	int	i;
+	// int	last_ate;
+
+	i = -1;
+	while (1)
+	{
+		while (++i < philos->num_philo)
+		{
+			// pthread_mutex_lock(&philos->r_mutex);
+			// last_ate = philos->philo[i].last_ate;
+			// pthread_mutex_unlock(&philos->r_mutex);
+			if (get_time() - philos->philo[i].last_ate >= (unsigned long)philos->time_to_die)
+			{
+				pthread_mutex_lock(&philos->print_mutex);
+				printf("[%lu] %d died\n", get_time() - philos->start_time, philos->philo[i].num);
+				pthread_mutex_unlock(&philos->print_mutex);
+				finish_exec(philos);
+			}
+		}
+		i = 0;
+	}
 	return ;
 }
 
-int main(int ac, char **av)
+int	main(int ac, char **av)
 {
 	t_info	philos;
 	int		i;
@@ -145,6 +183,7 @@ int main(int ac, char **av)
 	while (++i < philos.num_philo)
 		pthread_mutex_init(&philos.forks[i], 0);
 	pthread_mutex_init(&philos.print_mutex, 0);
+	pthread_mutex_init(&philos.r_mutex, 0);
 	i = -1;
 	while (++i < philos.num_philo)
 	{
@@ -156,12 +195,10 @@ int main(int ac, char **av)
 		philos.philo[i].left_fork = &(philos.forks[i]);
 		philos.philo[i].right_fork = &(philos.forks[(i + 1) % philos.num_philo]);
 		pthread_create(&philos.philo[i].id, 0, &routine, philos.philo + i);
+		// usleep(100);
 	}
 	// parent process checks statuses of philos and stops simulation when a philo dies
 	check_philos(&philos);
-	// pthread_mutex_lock(&philos.print_mutex);
-	// printf("[%lu] %d died\n", get_time() - philos.start_time, philos[]);
-	// pthread_mutex_unlock(&global->print_mutex);
 	i = -1;
 	while (++i < philos.num_philo)
 		pthread_join(philos.philo[i].id, 0);
