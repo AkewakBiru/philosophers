@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 19:48:32 by abiru             #+#    #+#             */
-/*   Updated: 2023/01/30 17:34:20 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/24 21:29:49 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,11 +45,8 @@ static int	cus_strlen(const char *str)
 
 static int	ft_sign(const char *str, int i)
 {
-	if (str[i] == '+' || str[i] == '-')
-	{
-		if (str[i] == '-')
-			return (-1);
-	}
+	if (str[i] == '-')
+		return (-1);
 	return (1);
 }
 
@@ -57,26 +54,21 @@ int	ft_atoi(const char *str)
 {
 	unsigned long long	result;
 	int					i;
-	int					sign;
 
 	result = 0;
-	sign = 1;
 	i = (int)skip_spaces(str);
-	sign = (int)ft_sign(str, i);
-	if (str[i] == '+' || str[i] == '-')
-		i++;
-	if (cus_strlen(str) >= 20 && sign == 1)
+	if ((int)ft_sign(str, i) == -1)
 		return (-1);
-	if (cus_strlen(str) >= 20 && sign == -1)
-		return (0);
+	if (str[i] == '+')
+		i++;
+	if (cus_strlen(str) >= 11)
+		return (-1);
 	while (str[i] != '\0' && str[i] >= '0' && str[i] <= '9')
 	{
+		if (result > 2147483647)
+			return (-1);
 		result = (result * 10) + str[i] - '0';
 		i++;
 	}
-	if (result >= 9223372036854775807 && sign == 1)
-		return (-1);
-	if (result > 9223372036854775807 && sign == -1)
-		return (0);
-	return (result * sign);
+	return (result);
 }
