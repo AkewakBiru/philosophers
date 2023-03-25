@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/28 07:54:49 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/25 15:22:12 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/25 19:54:05 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,8 @@ int	wait_action(unsigned long start, unsigned long time, t_info *global)
 	{
 		if (check_status(global))
 			return (0);
-		usleep(10);
+		// philos die when trying more than 70 sth, so changed the sleep value from 10 to 50;
+		usleep(50);
 	}
 	return (1);
 }
@@ -54,10 +55,11 @@ void	finish_exec(t_info *philos)
 
 	i = -1;
 	while (++i < philos->num_philo)
-		pthread_mutex_destroy(philos->forks + (sizeof(pthread_mutex_t) * i));
+		pthread_mutex_destroy(&philos->forks[i]);
 	pthread_mutex_unlock(&philos->print_mutex);
 	pthread_mutex_destroy(&philos->print_mutex);
 	pthread_mutex_destroy(&philos->r_mutex);
+	pthread_mutex_destroy(&philos->d_mutex);
 	i = -1;
 	while (++i < philos->num_philo)
 		pthread_detach(philos->philo[i].id);
@@ -80,6 +82,7 @@ void	finish_exec(t_info *philos)
 int	eat(int num, t_info *global, t_philo *philo)
 {
 	unsigned long	start;
+
 	if (!check_status(global))
 	{
 		pthread_mutex_lock(&global->print_mutex);
@@ -95,7 +98,7 @@ int	eat(int num, t_info *global, t_philo *philo)
 	start = get_time();
 	pthread_mutex_lock(&global->r_mutex);
 	// if (start + philo->last_ate > (unsigned long)global->time_to_die)
-	if (start - philo->last_ate < global->time_to_die)
+	// if (start - philo->last_ate < global->time_to_die)
 		philo->last_ate = start;
 	pthread_mutex_unlock(&global->r_mutex);
 	if (!wait_action(get_time(), global->time_to_eat, global))
@@ -184,8 +187,6 @@ void	*routine(void *d)
 		if (!ft_sleep(philo->num, global))
 			break ;
 		// should think after waking up if no 2 forks nearby
-		// if (check_status(global))
-		// 	break ;
 		if (!check_status(global))
 		{
 			pthread_mutex_lock(&global->print_mutex);
@@ -204,7 +205,7 @@ int	check_num_ate(t_info *global)
 	while (++i < global->num_philo)
 	{
 		pthread_mutex_lock(&global->r_mutex);
-		if (global->philo[i].num_eat == *global->num_eat)
+		if (global->philo[i].num_eat >= *global->num_eat)
 		{
 			pthread_mutex_unlock(&global->r_mutex);
 			continue ;
@@ -221,9 +222,7 @@ int	check_num_ate(t_info *global)
 void	check_philos(t_info	*philos)
 {
 	int	i;
-	// int	max_ate;
 
-	// max_ate = 1;
 	while (1)
 	{
 		i = -1;
@@ -237,19 +236,14 @@ void	check_philos(t_info	*philos)
 				philos->end_sim = 1;
 				pthread_mutex_unlock(&philos->d_mutex);
 				printf("[%lu] %d died\n", get_time() - philos->start_time, philos->philo[i].num);
-				pthread_mutex_unlock(&philos->print_mutex);
+				pthread_mutex_unlock(&philos->r_mutex);
+				return ;
 			}
 			pthread_mutex_unlock(&philos->r_mutex);
-			// if (philos->num_eat && philos->philo[i].num_eat < *philos->num_eat)
-			// 	max_ate = 0;
-			// if (!philos->num_eat)
-			// 	max_ate = 0;
 		}
-		
 		if ((philos->num_eat && check_num_ate(philos)) || philos->end_sim)
 			break ;
 	}
-	pthread_mutex_lock(&philos->print_mutex);
 	return ;
 }
 
@@ -289,11 +283,15 @@ int	main(int ac, char **av)
 		philos.philo[i].left_fork = &(philos.forks[i]);
 		philos.philo[i].right_fork = &(philos.forks[(i + 1) % philos.num_philo]);
 		pthread_create(&philos.philo[i].id, 0, routine, philos.philo + i);
+		// usleep(200);
 	}
 	// parent process checks statuses of philos and stops simulation when a philo dies
-	check_philos(&philos);
+	if (philos.num_philo > 1)
+		check_philos(&philos);
 	i = -1;
 	while (++i < philos.num_philo)
 		pthread_join(philos.philo[i].id, 0);
 	finish_exec(&philos);
 }
+
+// 100 800 200 200
