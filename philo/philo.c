@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/28 07:54:49 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/25 00:16:11 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/25 15:22:12 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,14 +27,25 @@ void	handle_one_philo(t_philo *philo, t_info *global)
 	finish_exec(global);
 }
 
-void	wait_action(unsigned long start, unsigned long time, t_info *global)
+int	check_status(t_info *global)
+{
+	int	status;
+
+	pthread_mutex_lock(&global->d_mutex);
+	status = global->end_sim;
+	pthread_mutex_unlock(&global->d_mutex);
+	return (status);
+}
+
+int	wait_action(unsigned long start, unsigned long time, t_info *global)
 {
 	while (get_time() - start < time)
 	{
-		if (global->end_sim)
-			break;
+		if (check_status(global))
+			return (0);
 		usleep(10);
 	}
+	return (1);
 }
 
 void	finish_exec(t_info *philos)
@@ -66,24 +77,35 @@ void	finish_exec(t_info *philos)
 	cur_time is 600, philo 2 sleeps.
 */
 
-void	eat(int num, t_info *global, t_philo *philo)
+int	eat(int num, t_info *global, t_philo *philo)
 {
 	unsigned long	start;
-	if (!global->end_sim)
+	if (!check_status(global))
 	{
 		pthread_mutex_lock(&global->print_mutex);
 		printf("\033[0;33m[%lu] %d is eating\n\033[0;30m", get_time() - global->start_time, num);
 		pthread_mutex_unlock(&global->print_mutex);
 	}
 	else
-		return ;
+	{
+		pthread_mutex_unlock(philo->left_fork);
+		pthread_mutex_unlock(philo->right_fork);
+		return (0);
+	}
 	start = get_time();
 	pthread_mutex_lock(&global->r_mutex);
 	// if (start + philo->last_ate > (unsigned long)global->time_to_die)
-	philo->last_ate = start;
+	if (start - philo->last_ate < global->time_to_die)
+		philo->last_ate = start;
 	pthread_mutex_unlock(&global->r_mutex);
-	wait_action(get_time(), global->time_to_eat, global);
+	if (!wait_action(get_time(), global->time_to_eat, global))
+	{
+		pthread_mutex_unlock(philo->left_fork);
+		pthread_mutex_unlock(philo->right_fork);
+		return (0);
+	}
 	philo->num_eat++;
+	return (1);
 	// last ate should be updated after the philosopher is done eating, because the philosopher
 	// might die while eating.
 }
@@ -98,23 +120,26 @@ int	check_death(t_info *global, t_philo *philo)
 	return (0);
 }
 
-void	ft_sleep(int id, t_info *global)
+int	ft_sleep(int id, t_info *global)
 {
-	if (!global->end_sim)
+	if (!check_status(global))
 	{
 		pthread_mutex_lock(&global->print_mutex);
 		printf("\033[0;36m[%lu] %d is sleeping\n\033[0;30m", get_time() - global->start_time, id);
 		pthread_mutex_unlock(&global->print_mutex);
 	}
 	else
-		return ;
-	wait_action(get_time(), global->time_to_sleep, global);
+		return (0);
+	return (wait_action(get_time(), global->time_to_sleep, global));
 }
 
-void *routine(void *d)
+void	*routine(void *d)
 {
-	t_philo *philo = (t_philo *)d;
-	t_info *global = philo->p_info;
+	t_philo	*philo;
+	t_info	*global;
+
+	philo = (t_philo *)d;
+	global = philo->p_info;
 	if (global->num_philo == 1)
 		handle_one_philo(philo, global);
 	if (philo->num % 2 == 0)
@@ -124,53 +149,44 @@ void *routine(void *d)
 		pthread_mutex_unlock(&global->print_mutex);
 		usleep(global->time_to_eat * 100);
 	}
-	while (!global->end_sim)
+	while (!check_status(global))
 	{
 		// lock left fork
 		pthread_mutex_lock(philo->left_fork);
-		if (global->end_sim)
+		if (!check_status(global))
+			pthread_mutex_lock(&global->print_mutex);
+		else
 		{
 			pthread_mutex_unlock(philo->left_fork);
 			break ;
 		}
-		if (!global->end_sim)
-			pthread_mutex_lock(&global->print_mutex);
-		else
-			break ;
 		printf("\033[0;32m[%lu] %d has taken left fork\n\033[0;30m", get_time() - global->start_time, philo->num);
 		pthread_mutex_unlock(&global->print_mutex);
 		// lock right fork
-		if (global->end_sim)
-		{
-			pthread_mutex_unlock(philo->left_fork);
-			break ;
-		}
 		pthread_mutex_lock(philo->right_fork);
-		if (!global->end_sim)
+		if (!check_status(global))
 			pthread_mutex_lock(&global->print_mutex);
 		else
-			break ;
-		printf("\033[0;32m[%lu] %d has taken right fork\n\033[0;30m", get_time() - global->start_time, philo->num);
-		pthread_mutex_unlock(&global->print_mutex);
-		// start eating
-		if (global->end_sim)
 		{
 			pthread_mutex_unlock(philo->left_fork);
 			pthread_mutex_unlock(philo->right_fork);
 			break ;
 		}
-		eat(philo->num, global, philo);
+		printf("\033[0;32m[%lu] %d has taken right fork\n\033[0;30m", get_time() - global->start_time, philo->num);
+		pthread_mutex_unlock(&global->print_mutex);
+		// start eating
+		if (!eat(philo->num, global, philo))
+			break ;
 		// last ate should be the time they start eating
 		// release forks
 		pthread_mutex_unlock(philo->left_fork);
 		pthread_mutex_unlock(philo->right_fork);
-		if (global->end_sim)
+		if (!ft_sleep(philo->num, global))
 			break ;
-		ft_sleep(philo->num, global);
 		// should think after waking up if no 2 forks nearby
-		if (global->end_sim)
-			break ;
-		if (!global->end_sim)
+		// if (check_status(global))
+		// 	break ;
+		if (!check_status(global))
 		{
 			pthread_mutex_lock(&global->print_mutex);
 			printf("\033[0;35m[%lu] %d is thinking\n\033[0;30m", get_time() - global->start_time, philo->num);
@@ -180,34 +196,58 @@ void *routine(void *d)
 	return (0);
 }
 
+int	check_num_ate(t_info *global)
+{
+	int	i;
+
+	i = -1;
+	while (++i < global->num_philo)
+	{
+		pthread_mutex_lock(&global->r_mutex);
+		if (global->philo[i].num_eat == *global->num_eat)
+		{
+			pthread_mutex_unlock(&global->r_mutex);
+			continue ;
+		}
+		pthread_mutex_unlock(&global->r_mutex);
+		return (0);
+	}
+	pthread_mutex_lock(&global->d_mutex);
+	global->end_sim = 1;
+	pthread_mutex_unlock(&global->d_mutex);
+	return (1);
+}
+
 void	check_philos(t_info	*philos)
 {
 	int	i;
-	int	max_ate;
+	// int	max_ate;
 
-	i = -1;
-	max_ate = 1;
+	// max_ate = 1;
 	while (1)
 	{
+		i = -1;
 		while (++i < philos->num_philo)
 		{
 			pthread_mutex_lock(&philos->r_mutex);
 			if (get_time() - philos->philo[i].last_ate >= (unsigned long)philos->time_to_die)
 			{
 				pthread_mutex_lock(&philos->print_mutex);
+				pthread_mutex_lock(&philos->d_mutex);
 				philos->end_sim = 1;
+				pthread_mutex_unlock(&philos->d_mutex);
 				printf("[%lu] %d died\n", get_time() - philos->start_time, philos->philo[i].num);
 				pthread_mutex_unlock(&philos->print_mutex);
 			}
 			pthread_mutex_unlock(&philos->r_mutex);
-			if (philos->num_eat && philos->philo[i].num_eat < *philos->num_eat)
-				max_ate = 0;
-			if (!philos->num_eat)
-				max_ate = 0;
+			// if (philos->num_eat && philos->philo[i].num_eat < *philos->num_eat)
+			// 	max_ate = 0;
+			// if (!philos->num_eat)
+			// 	max_ate = 0;
 		}
-		if (max_ate || philos->end_sim)
+		
+		if ((philos->num_eat && check_num_ate(philos)) || philos->end_sim)
 			break ;
-		i = 0;
 	}
 	pthread_mutex_lock(&philos->print_mutex);
 	return ;
@@ -233,9 +273,12 @@ int	main(int ac, char **av)
 		pthread_mutex_init(&philos.forks[i], 0);
 	pthread_mutex_init(&philos.print_mutex, 0);
 	pthread_mutex_init(&philos.r_mutex, 0);
+	pthread_mutex_init(&philos.d_mutex, 0);
 	i = -1;
 	philos.start_time = get_time();
+	pthread_mutex_lock(&philos.d_mutex);
 	philos.end_sim = 0;
+	pthread_mutex_unlock(&philos.d_mutex);
 	while (++i < philos.num_philo)
 	{
 		philos.philo[i].num = i + 1;

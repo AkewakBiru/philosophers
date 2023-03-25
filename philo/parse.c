@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/24 20:44:12 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/24 21:28:37 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/25 15:16:02 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,9 @@ void	validate_input(t_info *global, int ac, char **av)
 	global->time_to_die = ft_atoi(av[2]);
 	global->time_to_eat = ft_atoi(av[3]);
 	global->time_to_sleep = ft_atoi(av[4]);
+	global->num_eat = (int *)malloc(sizeof(int));
+	if (!global->num_eat)
+		error_msg("malloc fail\n");
 	if (av[5])
 		*global->num_eat = ft_atoi(av[5]);
 	else

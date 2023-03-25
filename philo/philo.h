@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/28 07:57:18 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/24 22:33:15 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/25 14:37:25 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ typedef struct philo
 	int				is_alive;
 	unsigned long	last_ate;
 	int				num_eat;
-	
 	struct s_info	*p_info;
 }	t_philo;
 
@@ -50,6 +49,7 @@ typedef struct s_info
 	int				*num_eat;
 	pthread_mutex_t	print_mutex;
 	pthread_mutex_t	r_mutex;
+	pthread_mutex_t	d_mutex;
 	pthread_mutex_t	*forks;
 	t_philo			*philo;
 	unsigned long	start_time;
