@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 19:48:32 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/24 21:29:49 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/26 17:01:10 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,5 +70,7 @@ int	ft_atoi(const char *str)
 		result = (result * 10) + str[i] - '0';
 		i++;
 	}
+	if (result > 2147483647)
+		return (-1);
 	return (result);
 }

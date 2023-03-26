@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/24 20:44:12 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/25 15:16:02 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/26 17:05:22 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ size_t	ft_strlen(const char *s)
 	return (i);
 }
 
-static void	error_msg(char *msg)
+void	error_msg(char *msg)
 {
 	write(2, msg, ft_strlen(msg));
 	write(2, "\n", 1);
@@ -62,20 +62,37 @@ void	validate_input(t_info *global, int ac, char **av)
 		error_msg("number_of_times_a_philosopher_must_eat (optional)\033[0;37m");
 	}
 	check_alpha(ac, av);
+	if (ft_atoi(av[2]) == -1 || ft_atoi(av[3]) == -1 || ft_atoi(av[4]) == -1)
+		error_msg("Invalid");
 	global->num_philo = ft_atoi(av[1]);
 	global->time_to_die = ft_atoi(av[2]);
 	global->time_to_eat = ft_atoi(av[3]);
 	global->time_to_sleep = ft_atoi(av[4]);
-	global->num_eat = (int *)malloc(sizeof(int));
-	if (!global->num_eat)
-		error_msg("malloc fail\n");
 	if (av[5])
-		*global->num_eat = ft_atoi(av[5]);
+	{
+		global->num_eat = ft_atoi(av[5]);
+		if (global->num_eat < 1)
+			error_msg("Invalid");
+	}
 	else
-		global->num_eat = 0;
-	if (ft_atoi(av[1]) > 200 || global->num_philo < 1 || global->time_to_die < 1
+		global->num_eat = -1;
+	if (global->num_philo < 1 || global->time_to_die < 1
 		|| global->time_to_eat < 1 || global->time_to_sleep < 1)
 		error_msg("Invalid");
-	if (global->num_eat && *global->num_eat < 1)
-		error_msg("Invalid");
+}
+
+void	wait_threads(t_info *philos)
+{
+	int	i;
+
+	i = -1;
+	while (++i < philos->num_philo)
+	{
+		if (pthread_join(philos->philo[i].id, 0) != 0)
+		{
+			free(philos->forks);
+			free(philos->philo);
+			error_msg("Wait failed");
+		}
+	}
 }
