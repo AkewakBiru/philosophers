@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/25 22:04:13 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/26 16:57:17 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/27 11:25:29 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,5 @@ void	handle_one_philo(t_philo *philo, t_info *global)
 	pthread_mutex_lock(&global->print_mutex);
 	printf("\033[0;37m[%d] %d died\n", global->time_to_die, philo->num);
 	pthread_mutex_unlock(&global->print_mutex);
-	pthread_join(philo->id, 0);
 	finish_exec(global);
 }
