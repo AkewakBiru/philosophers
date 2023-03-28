@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 13:55:04 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/27 14:47:05 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/28 22:33:49 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,19 +30,33 @@
 typedef struct s_info
 {
 	int				id;
+	sem_t			*sem_d;
+	sem_t			*sem_chk;
+	sem_t			*sem_p;
+	sem_t			*sem_f;
 	int				num_philo;
 	unsigned long	last_ate;
 	unsigned int	time_to_die;
 	unsigned int	time_to_eat;
 	unsigned int	time_to_sleep;
 	int				status;
-	int				num_eat;
+	unsigned int	num_eat;
+	unsigned int	eat_count;
 	unsigned long	start_time;
 }	t_info;
 
 void			validate_input(t_info *global, int ac, char **av);
 int				ft_atoi(const char *str);
 unsigned long	get_time(void);
-int	check_death(t_info *global);
-int				wait_action(unsigned long start, unsigned long time, t_info *global);
+int				check_death(t_info *global);
+int				wait_action(unsigned long start, unsigned long time,
+					t_info *global);
+void			unlink_semaphores(void);
+void			close_semaphores(t_info *philos);
+void			open_semaphores(t_info *philos);
+void			init_procs(t_info *philos, int proc[]);
+void			routine(t_info *philos);
+void			eat(t_info *philos);
+void			get_forks(t_info *philos);
+void			ft_sleep(t_info *philos);
 #endif

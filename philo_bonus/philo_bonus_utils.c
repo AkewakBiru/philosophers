@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 13:53:01 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/27 14:17:54 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/28 22:21:03 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,12 @@ int	wait_action(unsigned long start, unsigned long time, t_info *global)
 
 int	check_death(t_info *global)
 {
-	if (get_time() - global->last_ate >= (unsigned long)global->time_to_die)
-		global->status = DEAD;
-	return (global->status);
+	int	st;
+
+	sem_wait(global->sem_chk);
+	st = global->status;
+	sem_post(global->sem_chk);
+	return (st);
 }
 
 unsigned long	get_time(void)

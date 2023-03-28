@@ -6,91 +6,105 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/26 20:23:47 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/27 15:10:01 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/28 22:33:08 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
+#include <signal.h>
 
-// only wait for one process, because if sth exited, that means a philo has died
-void	routine(t_info *philos, sem_t *sem_lock, sem_t *sem_print)
+void	*check_status(void *data)
 {
-	philos->status = ALIVE;
-	philos->start_time = get_time();
-	philos->last_ate = get_time();
-	while (check_death(philos) != DEAD)
+	t_info	*philos;
+
+	philos = (t_info *)data;
+	while (!DEAD)
 	{
-		// take the first fork
-		sem_wait(sem_lock);
-		// print msg
-		sem_wait(sem_print);
-		printf("%s[%lu] %d has taken a fork\n%s", COL_FORK, get_time() - philos->start_time, philos->id, COL_DFL);
-		sem_post(sem_print);
-		// take the second fork
-		sem_wait(sem_lock);
-		// print msg
-		sem_wait(sem_print);
-		printf("%s[%lu] %d has taken a fork\n%s", COL_FORK, get_time() - philos->start_time, philos->id, COL_DFL);
-		sem_post(sem_print);
-		// eat
-		sem_wait(sem_print);
-		printf("%s[%lu] %d is eating\n%s", COL_EAT, get_time() - philos->start_time, philos->id, COL_DFL);
-		sem_post(sem_print);
-		if (!wait_action(get_time(), philos->time_to_eat, philos))
-			exit(philos->id);
-		// release forks
-		sem_post(sem_lock);
-		sem_post(sem_lock);
-		// sleep
-		sem_wait(sem_print);
-		printf("%s[%lu] %d is sleeping\n%s", COL_SLEEP, get_time() - philos->start_time, philos->id, COL_DFL);
-		sem_post(sem_print);
-		philos->last_ate = get_time();
-		if (!wait_action(get_time(), philos->time_to_sleep, philos))
-			exit(philos->id);
-		// think
-		sem_wait(sem_print);
-		printf("%s[%lu] %d is thinking\n%s", COL_THINK, get_time() - philos->start_time, philos->id, COL_DFL);
-		sem_post(sem_print);
+		sem_wait(philos->sem_p);
+		if (get_time() - philos->last_ate >= (unsigned long)philos->time_to_die)
+		{
+			philos->status = DEAD;
+			printf("[%lu] %d died\n", get_time() - philos->start_time,
+				philos->id);
+			sem_post(philos->sem_d);
+			return (0);
+		}
+		sem_post(philos->sem_p);
+		usleep(100);
 	}
-	// printf("inside the routine func\n");
-	exit(philos->id);
+	return (0);
+}
+
+// a thread that runs in an infinite loop is used to check if a philo dies
+// and release a blocking semaphore so that the parent process kills every
+// children procs
+void	routine(t_info *philos)
+{
+	pthread_t	t_id;
+
+	philos->last_ate = get_time();
+	pthread_create(&t_id, 0, check_status, philos);
+	pthread_detach(t_id);
+	while (1)
+	{
+		if (philos->num_eat != 2147483649 && philos->eat_count
+			>= philos->num_eat)
+		{
+			sem_post(philos->sem_d);
+			break ;
+		}
+		get_forks(philos);
+		eat(philos);
+		sem_post(philos->sem_f);
+		sem_post(philos->sem_f);
+		ft_sleep(philos);
+		sem_wait(philos->sem_p);
+		printf("%s[%lu] %d is thinking\n%s", COL_THINK, get_time()
+			- philos->start_time, philos->id, COL_DFL);
+		sem_post(philos->sem_p);
+	}
+	exit(EXIT_SUCCESS);
+}
+
+void	handle_one_philo(t_info *philos)
+{
+	pid_t	p_id;
+
+	p_id = fork();
+	if (p_id == -1)
+		perror("Fork");
+	else if (p_id == 0)
+	{
+		sem_wait(philos->sem_f);
+		printf("%s[%lu] %d has taken a fork\n%s", COL_FORK, get_time()
+			- philos->start_time, 1, COL_DFL);
+		usleep(philos->time_to_die * 1000);
+		sem_post(philos->sem_f);
+		printf("[%lu] %d died\n", get_time() - philos->start_time, 1);
+		exit(0);
+	}
+	waitpid(p_id, 0, 0);
+	kill(p_id, SIGKILL);
+	close_semaphores(philos);
+	exit(0);
 }
 
 int	main(int ac, char **av)
 {
 	t_info	philos;
-	sem_t	*semaphores;
-	sem_t	*sem_action;
 	int		i;
-	pid_t	proc;
-	int		e_status;
+	pid_t	proc[200];
 
 	validate_input(&philos, ac, av);
-	semaphores = sem_open("f_sem", O_CREAT | O_EXCL, philos.num_philo);
-	sem_action = sem_open("p_sem", O_CREAT | O_EXCL, 1);
-	i = -1;
-	philos.id = 0;
-	e_status = 0;
+	open_semaphores(&philos);
 	philos.start_time = get_time();
+	if (philos.num_philo == 1)
+		handle_one_philo(&philos);
+	init_procs(&philos, proc);
+	sem_wait(philos.sem_d);
+	i = -1;
 	while (++i < philos.num_philo)
-	{
-		proc = fork();
-		if (proc == -1)
-			perror("Fork");
-		if (proc == 0)
-		{
-			philos.id = i + 1;
-			routine(&philos, semaphores, sem_action);
-			exit(EXIT_SUCCESS);
-		}
-	}
-	sem_close(semaphores);
-	waitpid(-1, &e_status, 0);
-	if (WIFEXITED(e_status))
-		e_status = WEXITSTATUS(e_status);
-	else if (WIFSIGNALED(e_status))
-		e_status = WTERMSIG(e_status);
-	printf("[%lu] %d died\n", get_time() - philos.start_time, e_status);
-	return (e_status);
+		kill(proc[i], SIGKILL);
+	close_semaphores(&philos);
+	return (EXIT_SUCCESS);
 }
