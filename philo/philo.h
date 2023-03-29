@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/28 07:57:18 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/26 16:12:13 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/29 11:26:13 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,4 +69,5 @@ int				handle_odd_philos(t_info *global, t_philo *philo);
 int				print_death(t_info *philos, int i);
 void			unlock_forks(t_philo *philo);
 void			wait_threads(t_info *philos);
+void			print_usage(void);
 #endif

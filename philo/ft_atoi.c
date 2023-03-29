@@ -6,9 +6,19 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 19:48:32 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/26 17:01:10 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/29 11:26:22 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include "philo.h"
+
+void	print_usage(void)
+{
+	write(2, "\033[0;31mUSAGE: ./philo \033[0;35mnumber_of_philosophers", 52);
+	write(2, " \033[0;36mtime_to_die \033[0;34mtime_to_eat ", 39);
+	write(2, "\033[0;32mtime_to_sleep \033[0;37m", 29);
+	error_msg("number_of_times_a_philosopher_must_eat (optional)\033[0;37m");
+}
 
 static int	skip_spaces(const char *str)
 {
