@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/26 20:23:47 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/29 10:03:30 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/29 16:00:42 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,7 @@ void	handle_one_philo(t_info *philos)
 		usleep(philos->time_to_die * 1000);
 		sem_post(philos->sem_f);
 		printf("[%lu] %d died\n", get_time() - philos->start_time, 1);
+		close_semaphores(philos);
 		exit(0);
 	}
 	waitpid(p_id, 0, 0);

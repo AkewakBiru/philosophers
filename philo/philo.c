@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/28 07:54:49 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/26 16:20:56 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/29 15:41:54 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void	*routine(void *d)
 	philo = (t_philo *)d;
 	global = philo->p_info;
 	if (global->num_philo == 1)
-		handle_one_philo(philo, global);
+		return (handle_one_philo(philo, global));
 	if (philo->num % 2 == 0)
 		if (!handle_odd_philos(global, philo))
 			return (0);

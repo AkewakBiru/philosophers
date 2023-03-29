@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/26 20:24:53 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/28 22:05:40 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/29 14:01:17 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,17 +38,18 @@ static void	check_alpha(int ac, char **av)
 	while (++i < ac)
 	{
 		j = 0;
-		while (av[i][j] && (av[i][j] == ' ' || av[i][j] == '\t'))
+		while (av[i][j] && (av[i][j] == ' ' || av[i][j] == '\t'
+			|| av[i][j] == '\r' || av[i][j] == '\n'
+			|| av[i][j] == '\v' || av[i][j] == '\f'))
 			j++;
 		if (av[i][j] == '+')
 			j++;
-		while (av[i][j])
-		{
-			if (av[i][j] >= '0' && av[i][j] <= '9')
+		while (av[i][j] && av[i][j] >= '0' && av[i][j] <= '9')
 				j++;
-			else
-				error_msg("Invalid");
-		}
+		while (av[i][j] && (av[i][j] == ' ' || av[i][j] == '\t'))
+			j++;
+		if (av[i][j] != '\0')
+			error_msg("Invalid");
 	}
 }
 

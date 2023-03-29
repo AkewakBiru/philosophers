@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/24 20:44:12 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/29 11:25:16 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/29 14:06:37 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,17 +38,18 @@ static void	check_alpha(int ac, char **av)
 	while (++i < ac)
 	{
 		j = 0;
-		while (av[i][j] && (av[i][j] == ' ' || av[i][j] == '\t'))
+		while (av[i][j] && (av[i][j] == ' ' || av[i][j] == '\t'
+			|| av[i][j] == '\r' || av[i][j] == '\n'
+			|| av[i][j] == '\v' || av[i][j] == '\f'))
 			j++;
 		if (av[i][j] == '+')
 			j++;
-		while (av[i][j])
-		{
-			if (av[i][j] >= '0' && av[i][j] <= '9')
+		while (av[i][j] && av[i][j] >= '0' && av[i][j] <= '9')
 				j++;
-			else
-				error_msg("Invalid");
-		}
+		while (av[i][j] && (av[i][j] == ' ' || av[i][j] == '\t'))
+			j++;
+		if (av[i][j] != '\0')
+			error_msg("Invalid");
 	}
 }
 
@@ -75,8 +76,6 @@ void	validate_input(t_info *global, int ac, char **av)
 		|| global->time_to_die < 1 || global->time_to_eat < 1
 		|| global->time_to_sleep < 1)
 		error_msg("Invalid");
-	if (av[5])
-		global->num_eat++;
 }
 
 void	wait_threads(t_info *philos)

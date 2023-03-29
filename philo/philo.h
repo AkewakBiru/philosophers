@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/28 07:57:18 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/29 11:26:13 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/29 15:50:47 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,10 +64,11 @@ int				check_status(t_info *global);
 int				wait_action(unsigned long start, unsigned long time,
 					t_info *global);
 void			finish_exec(t_info *philos);
-void			handle_one_philo(t_philo *philo, t_info *global);
+void			*handle_one_philo(t_philo *philo, t_info *global);
 int				handle_odd_philos(t_info *global, t_philo *philo);
 int				print_death(t_info *philos, int i);
 void			unlock_forks(t_philo *philo);
 void			wait_threads(t_info *philos);
 void			print_usage(void);
+int				terminate_threads(t_info *philos, int i);
 #endif

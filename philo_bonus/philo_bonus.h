@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 13:55:04 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/29 10:05:17 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/29 15:09:05 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # include <sys/wait.h>
 # include <pthread.h>
 # include <signal.h>
+# include <fcntl.h>
 # define ALIVE 1
 # define DEAD 0
 # define COL_FORK "\033[0;32m"

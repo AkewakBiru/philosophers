@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/25 22:27:16 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/26 16:28:17 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/29 15:50:32 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,10 +54,11 @@ int	init_philos(t_info *philos)
 				% philos->num_philo]);
 		if (pthread_create(&philos->philo[i].id, 0, routine,
 				philos->philo + i) != 0)
+			return (terminate_threads(philos, i));
+		if (philos->num_philo == 1)
 		{
-			free(philos->forks);
-			free(philos->philo);
-			return (0);
+			pthread_join(philos->philo[i].id, 0);
+			finish_exec(philos);
 		}
 	}
 	return (1);

@@ -6,15 +6,15 @@
 #    By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/09 14:58:51 by abiru             #+#    #+#              #
-#    Updated: 2023/03/26 20:18:20 by abiru            ###   ########.fr        #
+#    Updated: 2023/03/29 16:13:20 by abiru            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = philo
 
-SRCS = philo.c ft_atoi.c parse.c init.c philo_utils.c phases.c
+SRCS = philo.c ft_atoi.c parse.c init.c philo_utils.c phases.c terminate.c
 
-CC = gcc -g -O0 
+CC = cc
 
 CFLAGS = -Wextra -Werror -Wall
 
