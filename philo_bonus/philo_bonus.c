@@ -6,12 +6,11 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/26 20:23:47 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/28 22:33:08 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/29 10:03:30 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
-#include <signal.h>
 
 void	*check_status(void *data)
 {

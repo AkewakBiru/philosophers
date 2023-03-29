@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/27 13:55:04 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/28 22:33:49 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/29 10:05:17 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <sys/time.h>
 # include <sys/wait.h>
 # include <pthread.h>
+# include <signal.h>
 # define ALIVE 1
 # define DEAD 0
 # define COL_FORK "\033[0;32m"
@@ -59,4 +60,5 @@ void			routine(t_info *philos);
 void			eat(t_info *philos);
 void			get_forks(t_info *philos);
 void			ft_sleep(t_info *philos);
+void			error_msg(char *msg);
 #endif

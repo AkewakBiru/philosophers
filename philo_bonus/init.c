@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 22:17:01 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/28 22:30:56 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/29 10:04:33 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,17 @@ void	open_semaphores(t_info *philos)
 	philos->sem_p = sem_open("/p_sem", O_CREAT | O_EXCL, 0777, 1);
 	philos->sem_d = sem_open("/sem_d", O_CREAT | O_EXCL, 0777, 0);
 	philos->sem_chk = sem_open("/sem_check", O_CREAT | O_EXCL, 0777, 1);
+	if (philos->sem_f == SEM_FAILED || philos->sem_p == SEM_FAILED
+		|| philos->sem_d == SEM_FAILED || philos->sem_chk == SEM_FAILED)
+		error_msg("Semaphore creation failed");
+}
+
+void	kill_siblings(t_info *philos, int proc[], int i)
+{
+	while (i-- >= 0)
+		kill(proc[i], SIGKILL);
+	close_semaphores(philos);
+	exit(EXIT_FAILURE);
 }
 
 void	init_procs(t_info *philos, int proc[])
@@ -48,7 +59,10 @@ void	init_procs(t_info *philos, int proc[])
 	{
 		proc[i] = fork();
 		if (proc[i] == -1)
+		{
 			perror("Fork");
+			kill_siblings(philos, proc, i);
+		}
 		if (proc[i] == 0)
 		{
 			philos->status = ALIVE;
