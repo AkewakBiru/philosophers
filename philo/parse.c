@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/24 20:44:12 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/26 17:05:22 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/29 11:18:32 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,15 +52,18 @@ static void	check_alpha(int ac, char **av)
 	}
 }
 
+static void	print_usage(void)
+{
+	write(2, "\033[0;31mUSAGE: ./philo \033[0;35mnumber_of_philosophers", 52);
+	write(2, " \033[0;36mtime_to_die \033[0;34mtime_to_eat ", 39);
+	write(2, "\033[0;32mtime_to_sleep \033[0;37m", 29);
+	error_msg("number_of_times_a_philosopher_must_eat (optional)\033[0;37m");
+}
+
 void	validate_input(t_info *global, int ac, char **av)
 {
 	if (ac < 5 || ac > 6)
-	{
-		write(2, "\033[0;31mUSAGE: ./philo \033[0;35mnumber_of_philosophers", 52);
-		write(2, " \033[0;36mtime_to_die \033[0;34mtime_to_eat ", 39);
-		write(2, "\033[0;32mtime_to_sleep \033[0;37m", 29);
-		error_msg("number_of_times_a_philosopher_must_eat (optional)\033[0;37m");
-	}
+		print_usage();
 	check_alpha(ac, av);
 	if (ft_atoi(av[2]) == -1 || ft_atoi(av[3]) == -1 || ft_atoi(av[4]) == -1)
 		error_msg("Invalid");
@@ -76,9 +79,12 @@ void	validate_input(t_info *global, int ac, char **av)
 	}
 	else
 		global->num_eat = -1;
-	if (global->num_philo < 1 || global->time_to_die < 1
-		|| global->time_to_eat < 1 || global->time_to_sleep < 1)
+	if (global->num_philo < 1 || global->num_philo > 200
+		|| global->time_to_die < 1 || global->time_to_eat < 1
+		|| global->time_to_sleep < 1)
 		error_msg("Invalid");
+	if (av[5])
+		global->num_eat++;
 }
 
 void	wait_threads(t_info *philos)
