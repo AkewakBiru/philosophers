@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/28 07:54:49 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/29 15:41:54 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/30 17:12:43 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,6 @@ void	*routine(void *d)
 
 	philo = (t_philo *)d;
 	global = philo->p_info;
-	if (global->num_philo == 1)
-		return (handle_one_philo(philo, global));
 	if (philo->num % 2 == 0)
 		if (!handle_odd_philos(global, philo))
 			return (0);
@@ -102,17 +100,14 @@ int	main(int ac, char **av)
 	int		k;
 
 	validate_input(&philos, ac, av);
-	philos.forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t)
-			* philos.num_philo);
-	if (!philos.forks)
-		error_msg("Malloc failed\n");
-	philos.philo = (t_philo *)malloc(sizeof(t_philo) * philos.num_philo);
-	if (!philos.philo)
-		return (free(philos.forks), error_msg("Malloc failed\n"), 1);
+	alloc_mem(&philos);
+	init_ints(&philos);
 	if (!init_mutexes(&philos))
-		error_msg("Mutex creation failed\n");
+		return (free(philos.f), free(philos.forks), free(philos.philo),
+			error_msg("Mutex creation failed\n"), 1);
 	if (!init_philos(&philos))
-		error_msg("Thread creation failed\n");
+		return (free(philos.f), free(philos.forks), free(philos.philo),
+			error_msg("Thread creation failed\n"), 1);
 	k = 0;
 	if (philos.num_philo > 1)
 		k = check_philos(&philos);

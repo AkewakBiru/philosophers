@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/25 23:00:53 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/26 15:03:43 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/30 23:06:13 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,9 @@ int	eat(int num, t_info *global, t_philo *philo)
 	pthread_mutex_unlock(&global->r_mutex);
 	if (!wait_action(get_time(), global->time_to_eat, global))
 		return (unlock_forks(philo), 0);
+	pthread_mutex_lock(&global->r_mutex);
 	philo->num_eat++;
+	pthread_mutex_unlock(&global->r_mutex);
 	return (1);
 }
 
@@ -59,11 +61,20 @@ int	think(t_info *global, t_philo *philo)
 int	lock_left_fork(t_info *global, t_philo *philo)
 {
 	pthread_mutex_lock(philo->left_fork);
-	if (check_status(global))
+	if (*philo->l_val)
 	{
 		pthread_mutex_unlock(philo->left_fork);
-		return (0);
+		if (check_status(global))
+		{
+			pthread_mutex_lock(philo->left_fork);
+			*philo->l_val = 0;
+			pthread_mutex_unlock(philo->left_fork);
+			return (0);
+		}
+		wait_left_fork(philo);
 	}
+	*philo->l_val = 1;
+	pthread_mutex_unlock(philo->left_fork);
 	pthread_mutex_lock(&global->print_mutex);
 	printf("\033[0;32m[%lu] %d has taken left fork\n\033[0;30m",
 		get_time() - global->start_time, philo->num);
@@ -74,8 +85,22 @@ int	lock_left_fork(t_info *global, t_philo *philo)
 int	lock_right_fork(t_info *global, t_philo *philo)
 {
 	pthread_mutex_lock(philo->right_fork);
-	if (check_status(global))
-		return (unlock_forks(philo), 0);
+	if (*philo->r_val == 1)
+	{
+		pthread_mutex_unlock(philo->right_fork);
+		if (check_status(global))
+			return (unlock_forks(philo), 0);
+		while (1)
+		{
+			pthread_mutex_lock(philo->right_fork);
+			if (*philo->r_val == 0)
+				break ;
+			pthread_mutex_unlock(philo->right_fork);
+			usleep(500);
+		}
+	}
+	*philo->r_val = 1;
+	pthread_mutex_unlock(philo->right_fork);
 	pthread_mutex_lock(&global->print_mutex);
 	printf("\033[0;32m[%lu] %d has taken right fork\n\033[0;30m",
 		get_time() - global->start_time, philo->num);

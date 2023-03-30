@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/25 22:04:13 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/29 15:42:12 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/30 13:27:41 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ void	finish_exec(t_info *philos)
 	pthread_mutex_destroy(&philos->r_mutex);
 	pthread_mutex_destroy(&philos->d_mutex);
 	free(philos->forks);
+	free(philos->f);
 	free(philos->philo);
 	exit(1);
 }
@@ -66,14 +67,23 @@ unsigned long	get_time(void)
 	return (tm);
 }
 
-void	*handle_one_philo(t_philo *philo, t_info *global)
+void	*handle_one_philo(void *d)
 {
+	t_philo	*philo;
+	t_info	*global;
+
+	philo = (t_philo *)d;
+	global = philo->p_info;
 	pthread_mutex_lock(philo->left_fork);
+	*philo->l_val = 1;
+	pthread_mutex_unlock(philo->left_fork);
 	pthread_mutex_lock(&global->print_mutex);
 	printf("\033[0;32m[%lu] %d has taken a fork\n\033[0;30m",
 		get_time() - global->start_time, philo->num);
 	pthread_mutex_unlock(&global->print_mutex);
 	usleep(global->time_to_die * 1000);
+	pthread_mutex_lock(philo->left_fork);
+	*philo->l_val = 0;
 	pthread_mutex_unlock(philo->left_fork);
 	pthread_mutex_lock(&global->print_mutex);
 	printf("\033[0;37m[%d] %d died\n", global->time_to_die, philo->num);
