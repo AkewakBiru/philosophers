@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/26 20:23:47 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/29 16:00:42 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/30 12:43:11 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void	*check_status(void *data)
 		if (get_time() - philos->last_ate >= (unsigned long)philos->time_to_die)
 		{
 			philos->status = DEAD;
-			printf("[%lu] %d died\n", get_time() - philos->start_time,
+			printf("%s[%lu] %d died\n", COL_DFL, get_time() - philos->start_time,
 				philos->id);
 			sem_post(philos->sem_d);
 			return (0);
@@ -34,9 +34,11 @@ void	*check_status(void *data)
 	return (0);
 }
 
-// a thread that runs in an infinite loop is used to check if a philo dies
-// and release a blocking semaphore so that the parent process kills every
-// children procs
+/* 
+	a thread that runs in an infinite loop is used to check if a philo dies
+ 	and release a blocking semaphore so that the parent process kills every
+ 	children procs
+*/
 void	routine(t_info *philos)
 {
 	pthread_t	t_id;

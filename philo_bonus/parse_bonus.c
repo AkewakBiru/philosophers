@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/26 20:24:53 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/29 14:01:17 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/30 12:39:04 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ void	validate_input(t_info *global, int ac, char **av)
 	if (av[5])
 	{
 		global->num_eat = ft_atoi(av[5]);
-		if (global->num_eat < 1)
+		if (global->num_eat < 1 || global->num_eat > 2147483647)
 			error_msg("Invalid");
 	}
 	else
