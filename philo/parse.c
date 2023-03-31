@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/24 20:44:12 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/29 14:06:37 by abiru            ###   ########.fr       */
+/*   Updated: 2023/03/31 11:29:49 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,7 @@ void	wait_threads(t_info *philos)
 		if (pthread_join(philos->philo[i].id, 0) != 0)
 		{
 			free(philos->forks);
+			free(philos->f);
 			free(philos->philo);
 			error_msg("Wait failed");
 		}
