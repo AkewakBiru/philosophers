@@ -6,16 +6,12 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/25 22:04:13 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/30 13:27:41 by abiru            ###   ########.fr       */
+/*   Updated: 2023/04/01 16:04:27 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-/*
-	destroy mutexes and free memory
-	(removed pthread_detach, because it created a segfault in linux)
-	./philo 200 1 200 200
-*/
+
 void	finish_exec(t_info *philos)
 {
 	int	i;
@@ -29,7 +25,7 @@ void	finish_exec(t_info *philos)
 	free(philos->forks);
 	free(philos->f);
 	free(philos->philo);
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 int	check_status(t_info *global)
@@ -42,9 +38,6 @@ int	check_status(t_info *global)
 	return (status);
 }
 
-// philos die when trying more than 70 sth, so changed the 
-// sleep value from 10 to 50 and later to 100 because philo dieing on my pc
-// (which still die when trying ./philo 200 800 200 200)
 int	wait_action(unsigned long start, unsigned long time, t_info *global)
 {
 	while (get_time() - start < time)
@@ -56,7 +49,9 @@ int	wait_action(unsigned long start, unsigned long time, t_info *global)
 	return (1);
 }
 
-// time in sec and microsecond converted to millisec
+/*
+ 	returns time in sec and microsecond converted to millisec
+ */
 unsigned long	get_time(void)
 {
 	unsigned long	tm;

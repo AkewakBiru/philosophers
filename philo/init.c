@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/25 22:27:16 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/30 17:12:29 by abiru            ###   ########.fr       */
+/*   Updated: 2023/04/01 16:09:37 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,13 @@ int	init_mutexes(t_info *philos)
 	if (pthread_mutex_init(&philos->d_mutex, 0) != 0)
 		flag = 0;
 	if (!flag)
-		return (free(philos->forks), free(philos->philo), 0);
+		return (free(philos->forks), free(philos->f),
+			free(philos->philo), EXIT_FAILURE);
 	philos->start_time = get_time();
 	pthread_mutex_lock(&philos->d_mutex);
 	philos->end_sim = 0;
 	pthread_mutex_unlock(&philos->d_mutex);
-	return (1);
+	return (EXIT_SUCCESS);
 }
 
 int	init_philos(t_info *philos)
@@ -85,12 +86,12 @@ void	alloc_mem(t_info *philos)
 	philos->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t)
 			* philos->num_philo);
 	if (!philos->forks)
-		error_msg("Malloc failed\n");
+		error_msg("Malloc failed");
 	philos->f = (int *)malloc(sizeof(int) * philos->num_philo);
 	if (!philos->f)
-		return (free(philos->forks), error_msg("Malloc failed\n"));
+		return (free(philos->forks), error_msg("Malloc failed"));
 	philos->philo = (t_philo *)malloc(sizeof(t_philo) * philos->num_philo);
 	if (!philos->philo)
 		return (free(philos->f), free(philos->forks),
-			error_msg("Malloc failed\n"));
+			error_msg("Malloc failed"));
 }

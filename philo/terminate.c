@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/29 15:49:57 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/30 23:06:25 by abiru            ###   ########.fr       */
+/*   Updated: 2023/04/01 16:00:56 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,10 @@
 
 int	terminate_threads(t_info *philos, int i)
 {
+	write(2, "Thread creation failed\n", 23);
 	while (i-- >= 0)
 		pthread_detach(philos->philo[i].id);
-	free(philos->forks);
-	free(philos->philo);
+	finish_exec(philos);
 	return (EXIT_FAILURE);
 }
 

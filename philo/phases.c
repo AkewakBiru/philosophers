@@ -6,14 +6,12 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/25 23:00:53 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/30 23:06:13 by abiru            ###   ########.fr       */
+/*   Updated: 2023/04/01 16:08:13 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-// last ate should be updated after the philosopher is done eating, 
-// because the philosopher might die while eating. ?
 int	eat(int num, t_info *global, t_philo *philo)
 {
 	unsigned long	start;

@@ -6,7 +6,7 @@
 /*   By: abiru <abiru@student.42abudhabi.ae>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/28 07:54:49 by abiru             #+#    #+#             */
-/*   Updated: 2023/03/30 17:12:43 by abiru            ###   ########.fr       */
+/*   Updated: 2023/04/01 15:58:39 by abiru            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,12 +102,9 @@ int	main(int ac, char **av)
 	validate_input(&philos, ac, av);
 	alloc_mem(&philos);
 	init_ints(&philos);
-	if (!init_mutexes(&philos))
-		return (free(philos.f), free(philos.forks), free(philos.philo),
-			error_msg("Mutex creation failed\n"), 1);
-	if (!init_philos(&philos))
-		return (free(philos.f), free(philos.forks), free(philos.philo),
-			error_msg("Thread creation failed\n"), 1);
+	if (init_mutexes(&philos) == EXIT_FAILURE)
+		return (error_msg("Mutex creation failed"), EXIT_FAILURE);
+	init_philos(&philos);
 	k = 0;
 	if (philos.num_philo > 1)
 		k = check_philos(&philos);
